@@ -5,7 +5,8 @@ export class NotFoundError extends CustomeError {
     statusCode = 404
 
     constructor() {
-        super() 
+        super("Page not found")
+
         Object.setPrototypeOf(this, NotFoundError.prototype)
     }
 

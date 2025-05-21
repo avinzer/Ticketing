@@ -6,7 +6,7 @@ export class DatabaseConnectionError extends CustomeError {
     response = "Database connection failed"
 
     constructor() {
-        super()
+        super("Database error")
         Object.setPrototypeOf(this, DatabaseConnectionError.prototype)
     }
 
