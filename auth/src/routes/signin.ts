@@ -1,12 +1,57 @@
-import express from "express"
+import express, { Request, Response } from "express";
+import { body } from "express-validator";
+import jwt from "jsonwebtoken";
 
+import { validateRequest } from "../middleware/validatedRequest";
+import { BadRequestError } from "../errors/bad-request-error";
+import { User } from "../models/user";
+import { Password } from "../services/password";
+import { ExitStatus } from "typescript";
 
-const router = express.Router()
+const router = express.Router();
 
+router.post(
+  "/api/users/signin",
+  [
+    body("email").isEmail().withMessage("Enter Valid Email"),
+    body("password")
+      .trim()
+      .notEmpty()
+      .withMessage("please fill the password field"),
+  ],
+  validateRequest,
+  async (req: Request, res: Response) => {
+    const { email, password } = req.body;
 
-router.get("/api/users/signin", (req, res, next) => {
-    res.status(200).send({"message": "Sign In"})
-})
+    const existingUser = await User.findOne({ email });
 
+    if (!existingUser) {
+      throw new BadRequestError("Email is already existed");
+    }
 
-export { router as signInRouter }
+    const passwordMatch = await Password.compare(
+      existingUser.password,
+      password
+    );
+
+    if (!passwordMatch) {
+      throw new BadRequestError("Invalid Credentials");
+    }
+
+    const userJwt = jwt.sign(
+      {
+        id: existingUser.id,
+        email: existingUser.email,
+      },
+      process.env.JWT_KEY!
+    );
+
+    req.session = {
+      jwt: userJwt,
+    };
+
+    res.status(200).send(existingUser);
+  }
+);
+
+export { router as signInRouter };

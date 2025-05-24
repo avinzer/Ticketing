@@ -1,12 +1,13 @@
-import express from "express"
+import express, { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
 
+import { currentUser } from "../middleware/currentUser";
+import { requireAuth } from "../middleware/require-auth";
 
-const router = express.Router()
+const router = express.Router();
 
+router.get("/api/users/currentuser", currentUser, requireAuth, (req: any, res: any) => {
+  res.send({ currentUser: req.currentUser });
+});
 
-router.get("/api/users/currentuser", (req, res, next) => {
-    res.status(200).send({"message": "current User"})
-})
-
-
-export { router as currentUserRouter }
+export { router as currentUserRouter };

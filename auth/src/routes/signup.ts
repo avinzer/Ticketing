@@ -1,12 +1,15 @@
 import express, { NextFunction, Request, Response } from "express";
 import { body, validationResult } from "express-validator";
-import { RequestValidationError } from "../errors/request-validation-error";
+import jwt from "jsonwebtoken";
+
 import { User } from "../models/user";
 import { BadRequestError } from "../errors/bad-request-error";
+import { RequestValidationError } from "../errors/request-validation-error";
+import { validateRequest } from "../middleware/validatedRequest";
 
 const router = express.Router();
 
-const user = []
+const user = [];
 
 router.post(
   "/api/users/signup",
@@ -17,30 +20,38 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage("Password must be between 4 and 20 charachter"),
   ],
-
+  validateRequest,
   async (req: any, res: any, next: any) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new RequestValidationError(errors.array());
-    }
-
     const { email, password } = req.body;
-    const existingUser = await User.findOne({email});
+    const existingUser = await User.findOne({ email });
 
-    if(existingUser) {
-      console.log("email in use")
-      throw new BadRequestError("Email existed")
+    if (existingUser) {
+      console.log("email in use");
+      throw new BadRequestError("Email existed");
     }
 
     const user = User.build({
-      email, password
-    })
+      email,
+      password,
+    });
 
-    await user.save()
+    await user.save();
 
-    res.send(user)
-    
+    // Generate JWT
+    const userJwt = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_KEY!
+    );
+
+    // store it on session object
+    req.session = {
+      jwt: userJwt,
+    };
+
+    res.send(user);
   }
 );
 

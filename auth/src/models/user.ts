@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Password } from "../services/password";
+import { transform } from "typescript";
 
 interface UserAttrs {
   email: string;
@@ -24,7 +25,17 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-});
+}, 
+  {toJSON: {
+    transform(doc, ret) {
+      ret.id = ret._id
+      delete ret._id
+      delete ret.password;
+      delete ret.__v
+      return ret
+    }
+  }}
+);
 
 userSchema.pre('save', async function(done) {
   if (this.isModified("password")) {
