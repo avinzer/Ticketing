@@ -4,12 +4,9 @@ import jwt from "jsonwebtoken";
 
 import { User } from "../models/user";
 import { BadRequestError } from "../errors/bad-request-error";
-import { RequestValidationError } from "../errors/request-validation-error";
 import { validateRequest } from "../middleware/validatedRequest";
 
 const router = express.Router();
-
-const user = [];
 
 router.post(
   "/api/users/signup",
@@ -26,7 +23,6 @@ router.post(
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      console.log("email in use");
       throw new BadRequestError("Email existed");
     }
 

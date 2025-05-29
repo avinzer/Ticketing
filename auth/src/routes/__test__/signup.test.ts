@@ -3,7 +3,7 @@ import { app } from "../../app";
 import { Password } from "../../services/password";
 
 
-it("send 201 if successfully connected", async () => {
+it("send 200 if successfully connected", async () => {
     return request(app)
         .post("/api/users/signup")
         .send({
