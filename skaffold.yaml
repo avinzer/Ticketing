@@ -18,6 +18,22 @@ build:
         manual:
           - src: 'src/**/*.ts'
             dest: .
+    - image: avinzer/tickets
+      context: tickets
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
+    - image: avinzer/orders
+      context: orders
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
     - image: avinzer/client
       context: client
       docker:

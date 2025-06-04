@@ -9,7 +9,6 @@ export default ({url, method, body, onSuccess}) => {
         try {
             setErrors(null) // Reset errors before making the request
             const {data} = await axios[method](url, body)
-            console.log("Response:", data)
             if (onSuccess) {
                 onSuccess(data)
             }

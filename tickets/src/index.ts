@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 import { app } from "./app";
+import { amqpWrapper } from "./amqp-wrapper";
 
-
-const connectWithRetry = () => {
+const connectWithRetry = async () => {
   if (!process.env.JWT_KEY) {
     throw new Error("JWT_KEY must be defined");
   }
@@ -12,10 +12,10 @@ const connectWithRetry = () => {
   }
   mongoose
     .connect(process.env.MONGO_URI)
-    .then(() => console.log("Connected to MongoDB"))
+    .then(() => amqpWrapper.connect("amqp://rabbitmq-srv:5672"))
     .then((res) => {
       app.listen(3000, () => {
-        console.log("Auth server running 1");
+        console.log("ticketing server running");
       });
     })
     .catch((err) => {
@@ -24,4 +24,4 @@ const connectWithRetry = () => {
     });
 };
 
-setTimeout(connectWithRetry, 2000)
+setTimeout(connectWithRetry, 2000);
