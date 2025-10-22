@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 import { TicketDoc } from "./tickets";
-import { OrderStatus } from "../events/types/order-status";
+import { OrderStatus } from "@avinzer21/common"
 
 interface OrdersAttrs {
   userId: string;

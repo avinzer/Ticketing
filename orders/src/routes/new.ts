@@ -5,9 +5,11 @@ import mongoose from "mongoose";
 
 import { Ticket } from "../models/tickets";
 import { Order } from "../models/orders";
-import { OrderStatus } from "../events/types/order-status";
+import { OrderStatus } from "@avinzer21/common";
 
 const router = express.Router();
+
+const EXPIRTAION_WINDOW_TIME = 15 * 60
 
 router.post(
   "/api/orders",
@@ -30,25 +32,19 @@ router.post(
       throw new NotFoundError();
     }
 
-    const existingOrder = await Order.findOne({
-      ticket: ticket,
-      status: {
-        $in: [
-          OrderStatus.Created,
-          OrderStatus.AwaitingPayment,
-          OrderStatus.Complete
-        ],
-      },
-    });
+    const isReserved = await ticket.isReserved()
 
-    if(existingOrder) {
-      throw new BadRequestError("Order already existed")
+    if(isReserved) {
+      throw new BadRequestError("Ticket is already reserved")
     }
+
+    const expirationOrder = new Date() 
+    expirationOrder.setSeconds(expirationOrder.getSeconds() + EXPIRTAION_WINDOW_TIME)
 
     const order = Order.build({
       userId: req.currentUser!.id,
       status: OrderStatus.Created,
-      expireAt: new Date(),
+      expireAt: expirationOrder,
       ticket
     })
 
